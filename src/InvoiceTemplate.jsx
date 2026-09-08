@@ -18,6 +18,9 @@ Font.register({
   ],
 });
 
+const cn = { fontFamily: 'NotoSansSC' };
+const cnBold = { fontFamily: 'NotoSansSC', fontWeight: 'bold' };
+
 const styles = StyleSheet.create({
   page: {
     padding: 50,
@@ -25,6 +28,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#000000',
   },
+
   // --- Header ---
   header: {
     borderBottomWidth: 2,
@@ -55,6 +59,7 @@ const styles = StyleSheet.create({
     color: '#444444',
     fontFamily: 'Helvetica',
   },
+
   // --- Invoice Title Row ---
   invoiceHeaderRow: {
     flexDirection: 'row',
@@ -62,49 +67,80 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 25,
   },
+  invoiceTitleBlock: {
+    flexDirection: 'column',
+  },
   invoiceTitle: {
-    fontSize: 26,
+    fontSize: 24,
     fontFamily: 'Helvetica-Bold',
     letterSpacing: 3,
+    marginBottom: 2,
+  },
+  invoiceTitleCN: {
+    fontSize: 13,
+    fontFamily: 'NotoSansSC',
+    fontWeight: 'bold',
+    color: '#333333',
   },
   metaBlock: {
     alignItems: 'flex-end',
   },
   metaRow: {
     flexDirection: 'row',
-    marginBottom: 3,
+    marginBottom: 4,
   },
   metaLabel: {
-    width: 80,
     fontFamily: 'Helvetica-Bold',
-    fontSize: 10,
+    fontSize: 9,
     textAlign: 'right',
+    marginRight: 6,
+  },
+  metaLabelCN: {
+    fontSize: 9,
+    fontFamily: 'NotoSansSC',
+    fontWeight: 'bold',
+    textAlign: 'right',
+    marginRight: 6,
+    color: '#444',
   },
   metaValue: {
     width: 110,
     textAlign: 'right',
     fontSize: 10,
   },
+
   // --- Bill To ---
   billToSection: {
-    marginBottom: 30,
-    paddingBottom: 15,
+    marginBottom: 28,
+    paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#cccccc',
     borderBottomStyle: 'solid',
   },
-  billToLabel: {
+  billToLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 5,
+    gap: 6,
+  },
+  billToLabelEN: {
     fontFamily: 'Helvetica-Bold',
     fontSize: 10,
     color: '#555555',
-    marginBottom: 4,
     textTransform: 'uppercase',
     letterSpacing: 1,
+    marginRight: 6,
+  },
+  billToLabelCN: {
+    fontFamily: 'NotoSansSC',
+    fontSize: 10,
+    color: '#777777',
   },
   billToValue: {
     fontFamily: 'NotoSansSC',
     fontSize: 12,
   },
+
   // --- Table ---
   table: {
     width: '100%',
@@ -119,25 +155,29 @@ const styles = StyleSheet.create({
   },
   tableHeaderCellDesc: {
     width: '65%',
-    fontFamily: 'Helvetica-Bold',
-    fontSize: 10,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   tableHeaderCellAmount: {
     width: '35%',
-    fontFamily: 'Helvetica-Bold',
-    fontSize: 10,
     textAlign: 'right',
+  },
+  thEN: {
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 9,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  thCN: {
+    fontFamily: 'NotoSansSC',
+    fontSize: 9,
+    color: '#555555',
+    marginTop: 1,
   },
   tableBody: {
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
     borderBottomStyle: 'solid',
-    paddingVertical: 12,
+    paddingVertical: 14,
   },
   tableCellDesc: {
     width: '65%',
@@ -151,18 +191,27 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontFamily: 'NotoSansSC',
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   dateBlock: {
-    marginBottom: 4,
+    marginBottom: 6,
   },
   dateLabelRow: {
+    flexDirection: 'row',
+    marginBottom: 2,
+  },
+  dateLabelEN: {
     fontSize: 9,
     fontFamily: 'Helvetica-Bold',
     color: '#333333',
-    marginBottom: 2,
+    marginRight: 4,
+  },
+  dateLabelCN: {
+    fontSize: 9,
+    fontFamily: 'NotoSansSC',
+    color: '#666666',
   },
   dateChinese: {
     fontFamily: 'NotoSansSC',
@@ -173,6 +222,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: '#555555',
   },
+
   // --- Total ---
   totalRow: {
     flexDirection: 'row',
@@ -183,51 +233,60 @@ const styles = StyleSheet.create({
     borderTopColor: '#000000',
     borderTopStyle: 'solid',
   },
-  totalLabel: {
+  totalLabelBlock: {
+    alignItems: 'flex-end',
+    marginRight: 24,
+  },
+  totalLabelEN: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 12,
-    marginRight: 30,
+    fontSize: 11,
+  },
+  totalLabelCN: {
+    fontFamily: 'NotoSansSC',
+    fontSize: 10,
+    color: '#555555',
+    marginTop: 1,
+  },
+  totalValueBlock: {
+    alignItems: 'flex-end',
+    minWidth: 100,
   },
   totalValue: {
     fontFamily: 'Helvetica-Bold',
-    fontSize: 12,
-    minWidth: 100,
+    fontSize: 13,
     textAlign: 'right',
   },
+
   // --- Company Chop ---
-  chopSection: {
+  chopWrapper: {
     position: 'absolute',
-    bottom: 80,
+    bottom: 60,
     right: 50,
-    width: 160,
-    height: 120,
+    alignItems: 'center',
+  },
+  chopBox: {
+    width: 150,
+    height: 110,
     borderWidth: 1,
     borderColor: '#cccccc',
     borderStyle: 'dashed',
     borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   chopLabel: {
-    fontSize: 8,
-    color: '#aaaaaa',
-    textAlign: 'center',
-    fontFamily: 'Helvetica',
-  },
-  chopLabelChinese: {
-    fontSize: 9,
-    color: '#aaaaaa',
-    textAlign: 'center',
+    marginTop: 5,
+    fontSize: 7.5,
+    color: '#bbbbbb',
     fontFamily: 'NotoSansSC',
-    marginBottom: 2,
+    textAlign: 'center',
   },
+
   // --- Footer ---
   footer: {
     position: 'absolute',
     bottom: 35,
     left: 50,
-    right: 50,
-    textAlign: 'center',
+    right: 215,
+    textAlign: 'left',
     color: '#888888',
     fontSize: 8,
     borderTopWidth: 1,
@@ -237,22 +296,13 @@ const styles = StyleSheet.create({
   },
 });
 
-/**
- * Convert a date string (YYYY-MM-DD) to Chinese lunar calendar string.
- * Returns something like: 农历 乙巳年 七月十六
- */
 function toChineseLunar(dateStr) {
   if (!dateStr) return '—';
   try {
     const d = parseISO(dateStr);
     const solar = Solar.fromDate(d);
     const lunar = solar.getLunar();
-
-    const yearGanZhi = lunar.getYearInGanZhi(); // e.g. 乙巳
-    const monthChinese = lunar.getMonthInChinese(); // e.g. 七
-    const dayChinese = lunar.getDayInChinese(); // e.g. 十六
-
-    return `农历 ${yearGanZhi}年 ${monthChinese}月${dayChinese}`;
+    return `农历 ${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
   } catch {
     return '—';
   }
@@ -269,7 +319,6 @@ function formatGregorian(dateStr) {
 
 const InvoiceTemplate = ({ formData, invoiceNumber }) => {
   const { customerName, startDate, endDate, price } = formData;
-
   const currentDateStr = format(new Date(), 'dd MMM yyyy');
   const priceNum = parseFloat(price || 0);
 
@@ -285,16 +334,21 @@ const InvoiceTemplate = ({ formData, invoiceNumber }) => {
           <Text style={styles.secretaryLine}>Secretary General: Ng Kee Hock</Text>
         </View>
 
-        {/* Invoice Title & Meta Info */}
+        {/* Invoice Title & Meta */}
         <View style={styles.invoiceHeaderRow}>
-          <Text style={styles.invoiceTitle}>INVOICE</Text>
+          <View style={styles.invoiceTitleBlock}>
+            <Text style={styles.invoiceTitle}>INVOICE</Text>
+            <Text style={styles.invoiceTitleCN}>发票</Text>
+          </View>
           <View style={styles.metaBlock}>
             <View style={styles.metaRow}>
-              <Text style={styles.metaLabel}>Invoice No:</Text>
+              <Text style={styles.metaLabel}>Invoice No / </Text>
+              <Text style={{...styles.metaLabelCN, marginRight: 6}}>发票号码:</Text>
               <Text style={styles.metaValue}>{invoiceNumber || 'DRAFT'}</Text>
             </View>
             <View style={styles.metaRow}>
-              <Text style={styles.metaLabel}>Date:</Text>
+              <Text style={styles.metaLabel}>Date / </Text>
+              <Text style={{...styles.metaLabelCN, marginRight: 6}}>日期:</Text>
               <Text style={styles.metaValue}>{currentDateStr}</Text>
             </View>
           </View>
@@ -302,34 +356,53 @@ const InvoiceTemplate = ({ formData, invoiceNumber }) => {
 
         {/* Bill To */}
         <View style={styles.billToSection}>
-          <Text style={styles.billToLabel}>Bill To</Text>
+          <View style={styles.billToLabelRow}>
+            <Text style={styles.billToLabelEN}>Bill To</Text>
+            <Text style={styles.billToLabelCN}>/ 致</Text>
+          </View>
           <Text style={styles.billToValue}>{customerName || '—'}</Text>
         </View>
 
         {/* Items Table */}
         <View style={styles.table}>
+          {/* Header */}
           <View style={styles.tableHeader}>
-            <Text style={styles.tableHeaderCellDesc}>Description</Text>
-            <Text style={styles.tableHeaderCellAmount}>Amount (RM)</Text>
+            <View style={styles.tableHeaderCellDesc}>
+              <Text style={styles.thEN}>Description</Text>
+              <Text style={styles.thCN}>描述</Text>
+            </View>
+            <View style={styles.tableHeaderCellAmount}>
+              <Text style={styles.thEN}>Amount (RM)</Text>
+              <Text style={styles.thCN}>金额 (令吉)</Text>
+            </View>
           </View>
+
+          {/* Row */}
           <View style={styles.tableBody}>
             <View style={styles.tableCellDesc}>
               <Text style={styles.itemTitle}>Setup 圆坛</Text>
 
               {/* Start Date */}
               <View style={styles.dateBlock}>
-                <Text style={styles.dateLabelRow}>Start:</Text>
+                <View style={styles.dateLabelRow}>
+                  <Text style={styles.dateLabelEN}>Start /</Text>
+                  <Text style={styles.dateLabelCN}> 开始日期</Text>
+                </View>
                 <Text style={styles.dateChinese}>{toChineseLunar(startDate)}</Text>
                 <Text style={styles.dateGregorian}>{formatGregorian(startDate)}</Text>
               </View>
 
               {/* End Date */}
               <View style={styles.dateBlock}>
-                <Text style={styles.dateLabelRow}>End:</Text>
+                <View style={styles.dateLabelRow}>
+                  <Text style={styles.dateLabelEN}>End /</Text>
+                  <Text style={styles.dateLabelCN}> 结束日期</Text>
+                </View>
                 <Text style={styles.dateChinese}>{toChineseLunar(endDate)}</Text>
                 <Text style={styles.dateGregorian}>{formatGregorian(endDate)}</Text>
               </View>
             </View>
+
             <View style={styles.tableCellAmount}>
               <Text>{priceNum.toFixed(2)}</Text>
             </View>
@@ -338,19 +411,25 @@ const InvoiceTemplate = ({ formData, invoiceNumber }) => {
 
         {/* Total */}
         <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total Amount:</Text>
-          <Text style={styles.totalValue}>RM {priceNum.toFixed(2)}</Text>
+          <View style={styles.totalLabelBlock}>
+            <Text style={styles.totalLabelEN}>Total Amount</Text>
+            <Text style={styles.totalLabelCN}>总金额</Text>
+          </View>
+          <View style={styles.totalValueBlock}>
+            <Text style={styles.totalValue}>RM {priceNum.toFixed(2)}</Text>
+          </View>
         </View>
 
-        {/* Company Chop Area */}
-        <View style={styles.chopSection}>
-          <Text style={styles.chopLabelChinese}>公司盖章</Text>
-          <Text style={styles.chopLabel}>Company Chop</Text>
+        {/* Company Chop — clean empty box, label sits quietly outside below */}
+        <View style={styles.chopWrapper}>
+          <View style={styles.chopBox} />
+          <Text style={styles.chopLabel}>公司盖章 / Company Chop</Text>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text>This is a computer-generated document. No signature is required.</Text>
+          <Text>This is a computer-generated document.</Text>
+          <Text style={{ fontFamily: 'NotoSansSC', marginTop: 2 }}>此乃电脑生成文件。</Text>
         </View>
 
       </Page>
