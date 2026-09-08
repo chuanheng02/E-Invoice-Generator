@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, DollarSign, User, FileText, CheckCircle, AlertCircle, LogOut } from 'lucide-react';
+import { Calendar, DollarSign, User, FileText, CheckCircle, AlertCircle, LogOut } from 'lucide-react';
 import { pdf } from '@react-pdf/renderer';
 import InvoiceTemplate from './InvoiceTemplate';
 import { supabase } from './supabaseClient';
@@ -8,9 +8,7 @@ function App({ session }) {
   const [formData, setFormData] = useState({
     customerName: '',
     startDate: '',
-    startTime: '',
     endDate: '',
-    endTime: '',
     price: '',
   });
 
@@ -18,7 +16,6 @@ function App({ session }) {
   const [status, setStatus] = useState({ type: '', message: '' });
   const [invoiceNumber, setInvoiceNumber] = useState('');
 
-  // Generate a unique invoice number on mount and after each successful generation
   const generateInvoiceNumber = () => {
     const now = new Date();
     const year = now.getFullYear().toString().slice(-2);
@@ -45,7 +42,6 @@ function App({ session }) {
     setIsGenerating(true);
     setStatus({ type: '', message: '' });
 
-    // Basic validation: end date should not be before start date
     if (formData.startDate && formData.endDate && formData.endDate < formData.startDate) {
       setStatus({ type: 'error', message: 'End date cannot be before start date.' });
       setIsGenerating(false);
@@ -53,13 +49,11 @@ function App({ session }) {
     }
 
     try {
-      // 1. Generate the PDF blob
       const blob = await pdf(
         <InvoiceTemplate formData={formData} invoiceNumber={invoiceNumber} />
       ).toBlob();
       const fileName = `${invoiceNumber}.pdf`;
 
-      // 2. Upload to Supabase Storage Bucket ('invoices')
       const { error: uploadError } = await supabase.storage
         .from('invoices')
         .upload(fileName, blob, {
@@ -74,12 +68,10 @@ function App({ session }) {
         );
       }
 
-      // Get public URL
       const {
         data: { publicUrl },
       } = supabase.storage.from('invoices').getPublicUrl(fileName);
 
-      // 3. Insert metadata into Supabase Database ('invoices' table)
       const { error: dbError } = await supabase.from('invoices').insert([
         {
           invoice_number: invoiceNumber,
@@ -97,7 +89,6 @@ function App({ session }) {
         );
       }
 
-      // 4. Trigger local download
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -112,7 +103,6 @@ function App({ session }) {
         message: `${invoiceNumber} — Invoice saved to cloud and downloaded!`,
       });
 
-      // Generate next invoice number for the next submission
       setInvoiceNumber(generateInvoiceNumber());
     } catch (error) {
       console.error(error);
@@ -173,22 +163,6 @@ function App({ session }) {
             />
           </div>
 
-          {/* Start Time */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="startTime">
-              <Clock className="icon" />
-              Start Time
-            </label>
-            <input
-              id="startTime"
-              type="time"
-              name="startTime"
-              value={formData.startTime}
-              onChange={handleChange}
-              className="form-input"
-            />
-          </div>
-
           {/* End Date */}
           <div className="form-group">
             <label className="form-label" htmlFor="endDate">
@@ -203,22 +177,6 @@ function App({ session }) {
               onChange={handleChange}
               className="form-input"
               required
-            />
-          </div>
-
-          {/* End Time */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="endTime">
-              <Clock className="icon" />
-              End Time
-            </label>
-            <input
-              id="endTime"
-              type="time"
-              name="endTime"
-              value={formData.endTime}
-              onChange={handleChange}
-              className="form-input"
             />
           </div>
 

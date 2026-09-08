@@ -1,8 +1,9 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
 import { format, parseISO } from 'date-fns';
+import { Solar } from 'lunar-javascript';
 
-// Register Chinese fonts for 元天宫 and 圆坛
+// Register Chinese fonts
 Font.register({
   family: 'NotoSansSC',
   fonts: [
@@ -115,7 +116,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#000000',
     borderBottomStyle: 'solid',
     paddingBottom: 6,
-    marginBottom: 0,
   },
   tableHeaderCellDesc: {
     width: '65%',
@@ -153,12 +153,25 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSansSC',
     fontSize: 11,
     fontWeight: 'bold',
-    marginBottom: 6,
+    marginBottom: 8,
   },
-  itemDetail: {
+  dateBlock: {
+    marginBottom: 4,
+  },
+  dateLabelRow: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: '#333333',
+    marginBottom: 2,
+  },
+  dateChinese: {
+    fontFamily: 'NotoSansSC',
+    fontSize: 10,
+    marginBottom: 1,
+  },
+  dateGregorian: {
     fontSize: 9,
     color: '#555555',
-    marginBottom: 2,
   },
   // --- Total ---
   totalRow: {
@@ -181,10 +194,37 @@ const styles = StyleSheet.create({
     minWidth: 100,
     textAlign: 'right',
   },
+  // --- Company Chop ---
+  chopSection: {
+    position: 'absolute',
+    bottom: 80,
+    right: 50,
+    width: 160,
+    height: 120,
+    borderWidth: 1,
+    borderColor: '#cccccc',
+    borderStyle: 'dashed',
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chopLabel: {
+    fontSize: 8,
+    color: '#aaaaaa',
+    textAlign: 'center',
+    fontFamily: 'Helvetica',
+  },
+  chopLabelChinese: {
+    fontSize: 9,
+    color: '#aaaaaa',
+    textAlign: 'center',
+    fontFamily: 'NotoSansSC',
+    marginBottom: 2,
+  },
   // --- Footer ---
   footer: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 35,
     left: 50,
     right: 50,
     textAlign: 'center',
@@ -197,30 +237,39 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * Convert a date string (YYYY-MM-DD) to Chinese lunar calendar string.
+ * Returns something like: 农历 乙巳年 七月十六
+ */
+function toChineseLunar(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    const d = parseISO(dateStr);
+    const solar = Solar.fromDate(d);
+    const lunar = solar.getLunar();
+
+    const yearGanZhi = lunar.getYearInGanZhi(); // e.g. 乙巳
+    const monthChinese = lunar.getMonthInChinese(); // e.g. 七
+    const dayChinese = lunar.getDayInChinese(); // e.g. 十六
+
+    return `农历 ${yearGanZhi}年 ${monthChinese}月${dayChinese}`;
+  } catch {
+    return '—';
+  }
+}
+
+function formatGregorian(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    return format(parseISO(dateStr), 'dd MMM yyyy');
+  } catch {
+    return dateStr;
+  }
+}
+
 const InvoiceTemplate = ({ formData, invoiceNumber }) => {
-  const { customerName, startDate, startTime, endDate, endTime, price } = formData;
+  const { customerName, startDate, endDate, price } = formData;
 
-  // Use parseISO to avoid timezone off-by-one issues with date-only strings
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    try {
-      return format(parseISO(dateStr), 'dd MMM yyyy');
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const formatTime12h = (timeStr) => {
-    if (!timeStr) return '';
-    const [h, m] = timeStr.split(':');
-    const hour = parseInt(h, 10);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour % 12 || 12;
-    return `${hour12}:${m} ${ampm}`;
-  };
-
-  const startStr = startDate ? `${formatDate(startDate)}${startTime ? ', ' + formatTime12h(startTime) : ''}` : '—';
-  const endStr = endDate ? `${formatDate(endDate)}${endTime ? ', ' + formatTime12h(endTime) : ''}` : '—';
   const currentDateStr = format(new Date(), 'dd MMM yyyy');
   const priceNum = parseFloat(price || 0);
 
@@ -266,8 +315,20 @@ const InvoiceTemplate = ({ formData, invoiceNumber }) => {
           <View style={styles.tableBody}>
             <View style={styles.tableCellDesc}>
               <Text style={styles.itemTitle}>Setup 圆坛</Text>
-              <Text style={styles.itemDetail}>Start: {startStr}</Text>
-              <Text style={styles.itemDetail}>End: {endStr}</Text>
+
+              {/* Start Date */}
+              <View style={styles.dateBlock}>
+                <Text style={styles.dateLabelRow}>Start:</Text>
+                <Text style={styles.dateChinese}>{toChineseLunar(startDate)}</Text>
+                <Text style={styles.dateGregorian}>{formatGregorian(startDate)}</Text>
+              </View>
+
+              {/* End Date */}
+              <View style={styles.dateBlock}>
+                <Text style={styles.dateLabelRow}>End:</Text>
+                <Text style={styles.dateChinese}>{toChineseLunar(endDate)}</Text>
+                <Text style={styles.dateGregorian}>{formatGregorian(endDate)}</Text>
+              </View>
             </View>
             <View style={styles.tableCellAmount}>
               <Text>{priceNum.toFixed(2)}</Text>
@@ -279,6 +340,12 @@ const InvoiceTemplate = ({ formData, invoiceNumber }) => {
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total Amount:</Text>
           <Text style={styles.totalValue}>RM {priceNum.toFixed(2)}</Text>
+        </View>
+
+        {/* Company Chop Area */}
+        <View style={styles.chopSection}>
+          <Text style={styles.chopLabelChinese}>公司盖章</Text>
+          <Text style={styles.chopLabel}>Company Chop</Text>
         </View>
 
         {/* Footer */}
