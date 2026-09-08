@@ -20,19 +20,22 @@ function App({ session }) {
 
   /**
    * Generates a sequential invoice number by querying the DB.
-   * Format: INV-YYMM-NNNN
-   *   YYMM = current year + month (e.g. 2609 for Sep 2026)
-   *   NNNN = count of ALL invoices + 1 (global sequence, never resets)
-   * Example: INV-2609-0001, INV-2609-0002, INV-2610-0003
+   * Format: DDMMYY-NNNN
+   *   DD   = day (e.g. 08)
+   *   MM   = month (e.g. 09)
+   *   YY   = year (e.g. 26)
+   *   NNNN = global running count, never resets
+   * Example: 080926-0001, 080926-0002, 090926-0003
    */
   const fetchNextInvoiceNumber = async () => {
     const now = new Date();
-    const year = now.getFullYear().toString().slice(-2);
+    const day   = now.getDate().toString().padStart(2, '0');
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const prefix = `INV-${year}${month}`;
+    const year  = now.getFullYear().toString().slice(-2);
+    const prefix = `${day}${month}${year}`;
 
-    // Count ALL invoices ever created by this user to get a global sequence
-    const { count, error } = await supabase
+    // Count ALL invoices ever to get a global sequence
+    const { count } = await supabase
       .from('invoices')
       .select('*', { count: 'exact', head: true });
 
