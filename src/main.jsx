@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import App from './App.jsx'
 import Login from './Login.jsx'
+import History from './History.jsx'
 import { supabase } from './supabaseClient'
 import './index.css'
 
@@ -39,6 +40,7 @@ function Root() {
       <Routes>
         <Route path="/" element={session ? <Navigate to="/app" replace /> : <Login />} />
         <Route path="/app" element={session ? <App session={session} /> : <Navigate to="/" replace />} />
+        <Route path="/history" element={session ? <History session={session} /> : <Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

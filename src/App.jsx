@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, DollarSign, User, FileText, CheckCircle, AlertCircle, LogOut } from 'lucide-react';
+import { Calendar, DollarSign, User, FileText, CheckCircle, AlertCircle, LogOut, History } from 'lucide-react';
 import { pdf } from '@react-pdf/renderer';
+import { useNavigate } from 'react-router-dom';
 import InvoiceTemplate from './InvoiceTemplate';
 import { supabase } from './supabaseClient';
 
 function App({ session }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     customerName: '',
     startDate: '',
@@ -118,9 +120,14 @@ function App({ session }) {
         <h1>元天宫 E-Invoice</h1>
         <p className="subtitle">Persatuan Penganut Dewa Yuan Tian Kong, KL &amp; Selangor</p>
         <span className="org-badge">Registration No. 1025-07-WKL</span>
-        <button onClick={handleLogout} className="btn-logout">
-          <LogOut className="icon" /> Logout
-        </button>
+        <div style={{ position: 'absolute', top: 0, right: 0, display: 'flex', gap: '0.5rem' }}>
+          <button onClick={() => navigate('/history')} className="btn-logout" style={{ position: 'static', color: 'var(--accent-color)' }}>
+            <History className="icon" /> History
+          </button>
+          <button onClick={handleLogout} className="btn-logout" style={{ position: 'static' }}>
+            <LogOut className="icon" /> Logout
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleGenerate}>
