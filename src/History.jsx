@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Search, Download, FileText,
   Calendar, DollarSign, User, RefreshCw,
-  ChevronUp, ChevronDown, X, Filter
+  ChevronUp, ChevronDown, X, Filter, FileDown
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
@@ -84,6 +84,31 @@ function History({ session }) {
     setFilterMaxPrice('');
   };
 
+  // Export currently-visible invoices as a CSV file for backup
+  const exportCSV = () => {
+    if (filtered.length === 0) return;
+    const headers = ['Invoice No', 'Customer Name', 'Amount (RM)', 'PDF URL', 'Created At'];
+    const rows = filtered.map((inv) => [
+      inv.invoice_number || '',
+      inv.customer_name || '',
+      parseFloat(inv.price || 0).toFixed(2),
+      inv.pdf_url || '',
+      inv.created_at ? format(parseISO(inv.created_at), 'dd MMM yyyy hh:mm a') : '',
+    ]);
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `invoices-export-${format(new Date(), 'yyyyMMdd')}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const hasFilters = search || filterFrom || filterTo || filterMinPrice || filterMaxPrice;
 
   const SortIcon = ({ field }) => {
@@ -129,6 +154,14 @@ function History({ session }) {
             onClick={() => setShowFilters((v) => !v)}
           >
             <Filter size={15} /> Filters {hasFilters && <span className="filter-dot" />}
+          </button>
+          <button
+            className="btn-filter"
+            onClick={exportCSV}
+            disabled={filtered.length === 0}
+            title="Export visible invoices as CSV"
+          >
+            <FileDown size={15} /> Export CSV
           </button>
           <button className="btn-refresh" onClick={fetchInvoices} title="Refresh">
             <RefreshCw size={15} className={loading ? 'spinner' : ''} />

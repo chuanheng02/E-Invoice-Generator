@@ -16,18 +16,32 @@ function App({ session }) {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [status, setStatus] = useState({ type: '', message: '' });
-  const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [invoiceNumber, setInvoiceNumber] = useState('Loading...');
 
-  const generateInvoiceNumber = () => {
+  /**
+   * Generates a sequential invoice number by querying the DB.
+   * Format: INV-YYMM-NNNN
+   *   YYMM = current year + month (e.g. 2609 for Sep 2026)
+   *   NNNN = count of ALL invoices + 1 (global sequence, never resets)
+   * Example: INV-2609-0001, INV-2609-0002, INV-2610-0003
+   */
+  const fetchNextInvoiceNumber = async () => {
     const now = new Date();
     const year = now.getFullYear().toString().slice(-2);
     const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const seq = now.getTime().toString().slice(-5);
-    return `INV-${year}${month}-${seq}`;
+    const prefix = `INV-${year}${month}`;
+
+    // Count ALL invoices ever created by this user to get a global sequence
+    const { count, error } = await supabase
+      .from('invoices')
+      .select('*', { count: 'exact', head: true });
+
+    const nextSeq = ((count || 0) + 1).toString().padStart(4, '0');
+    return `${prefix}-${nextSeq}`;
   };
 
   useEffect(() => {
-    setInvoiceNumber(generateInvoiceNumber());
+    fetchNextInvoiceNumber().then(setInvoiceNumber);
   }, []);
 
   const handleChange = (e) => {
@@ -105,7 +119,8 @@ function App({ session }) {
         message: `${invoiceNumber} — Invoice saved to cloud and downloaded!`,
       });
 
-      setInvoiceNumber(generateInvoiceNumber());
+      // Generate next invoice number from DB for the next submission
+      fetchNextInvoiceNumber().then(setInvoiceNumber);
     } catch (error) {
       console.error(error);
       setStatus({ type: 'error', message: error.message || 'Failed to generate invoice.' });
