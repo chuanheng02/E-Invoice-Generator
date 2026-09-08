@@ -1,195 +1,245 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Font } from '@react-pdf/renderer';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
-// Register fonts if needed, or use default standard fonts
-// Since it's B&W and professional, Helvetica (default) is fine. 
-// However, for Chinese characters (元天宫, 圆坛), we NEED a font that supports Chinese.
-// We will use standard NotoSansSC or similar. But wait, @react-pdf/renderer requires a URL for custom fonts.
-// To handle Chinese characters, we must register a font.
+// Register Chinese fonts for 元天宫 and 圆坛
 Font.register({
   family: 'NotoSansSC',
-  src: 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.0.12/files/noto-sans-sc-chinese-simplified-400-normal.woff'
-});
-Font.register({
-  family: 'NotoSansSC-Bold',
-  src: 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.0.12/files/noto-sans-sc-chinese-simplified-700-normal.woff'
+  fonts: [
+    {
+      src: 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.0.12/files/noto-sans-sc-chinese-simplified-400-normal.woff',
+      fontWeight: 'normal',
+    },
+    {
+      src: 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.0.12/files/noto-sans-sc-chinese-simplified-700-normal.woff',
+      fontWeight: 'bold',
+    },
+  ],
 });
 
 const styles = StyleSheet.create({
   page: {
-    padding: 40,
+    padding: 50,
     fontFamily: 'Helvetica',
     fontSize: 10,
     color: '#000000',
   },
-  chineseText: {
-    fontFamily: 'NotoSansSC',
-  },
-  chineseTextBold: {
-    fontFamily: 'NotoSansSC-Bold',
-  },
+  // --- Header ---
   header: {
-    borderBottom: '1 solid #000000',
-    paddingBottom: 15,
-    marginBottom: 20,
-  },
-  titleContainer: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#000000',
+    borderBottomStyle: 'solid',
+    paddingBottom: 18,
+    marginBottom: 25,
     textAlign: 'center',
-    marginBottom: 10,
   },
-  orgTitle: {
-    fontSize: 20,
-    fontFamily: 'NotoSansSC-Bold',
-    marginBottom: 4,
+  orgNameChinese: {
+    fontSize: 22,
+    fontFamily: 'NotoSansSC',
+    fontWeight: 'bold',
+    marginBottom: 3,
   },
-  orgSubtitle: {
-    fontSize: 12,
-    marginBottom: 4,
+  orgRegNo: {
+    fontSize: 10,
+    fontFamily: 'Helvetica',
+    marginBottom: 6,
   },
-  secretary: {
+  orgNameMalay: {
+    fontSize: 11,
+    fontFamily: 'Helvetica',
+    marginBottom: 3,
+  },
+  secretaryLine: {
     fontSize: 9,
-    color: '#333333',
+    color: '#444444',
+    fontFamily: 'Helvetica',
   },
+  // --- Invoice Title Row ---
   invoiceHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    alignItems: 'flex-start',
+    marginBottom: 25,
   },
   invoiceTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
+    fontSize: 26,
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 3,
   },
-  metaContainer: {
-    flexDirection: 'column',
+  metaBlock: {
     alignItems: 'flex-end',
   },
   metaRow: {
     flexDirection: 'row',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   metaLabel: {
     width: 80,
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 10,
+    textAlign: 'right',
   },
   metaValue: {
-    width: 100,
+    width: 110,
     textAlign: 'right',
+    fontSize: 10,
   },
-  billTo: {
+  // --- Bill To ---
+  billToSection: {
     marginBottom: 30,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#cccccc',
+    borderBottomStyle: 'solid',
   },
   billToLabel: {
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 10,
+    color: '#555555',
     marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
+  billToValue: {
+    fontFamily: 'NotoSansSC',
+    fontSize: 12,
+  },
+  // --- Table ---
   table: {
-    display: 'table',
-    width: 'auto',
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderRightWidth: 0,
-    borderBottomWidth: 0,
+    width: '100%',
+    marginBottom: 20,
   },
-  tableRow: {
-    margin: 'auto',
+  tableHeader: {
     flexDirection: 'row',
+    borderBottomWidth: 2,
+    borderBottomColor: '#000000',
+    borderBottomStyle: 'solid',
+    paddingBottom: 6,
+    marginBottom: 0,
   },
-  tableColHeader: {
-    width: '33.33%',
-    borderStyle: 'solid',
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    backgroundColor: '#f3f3f3',
-    padding: 5,
-    fontWeight: 'bold',
+  tableHeaderCellDesc: {
+    width: '65%',
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  tableCol: {
-    width: '33.33%',
-    borderStyle: 'solid',
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    padding: 5,
-  },
-  tableColWideHeader: {
-    width: '66.66%',
-    borderStyle: 'solid',
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    backgroundColor: '#f3f3f3',
-    padding: 5,
-    fontWeight: 'bold',
-  },
-  tableColWide: {
-    width: '66.66%',
-    borderStyle: 'solid',
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    padding: 5,
-  },
-  tableCell: {
-    marginTop: 2,
-  },
-  tableCellRight: {
-    marginTop: 2,
+  tableHeaderCellAmount: {
+    width: '35%',
+    fontFamily: 'Helvetica-Bold',
+    fontSize: 10,
     textAlign: 'right',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
+  tableBody: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    borderBottomStyle: 'solid',
+    paddingVertical: 12,
+  },
+  tableCellDesc: {
+    width: '65%',
+  },
+  tableCellAmount: {
+    width: '35%',
+    textAlign: 'right',
+    fontSize: 11,
+    fontFamily: 'Helvetica',
+    paddingTop: 2,
+  },
+  itemTitle: {
+    fontFamily: 'NotoSansSC',
+    fontSize: 11,
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  itemDetail: {
+    fontSize: 9,
+    color: '#555555',
+    marginBottom: 2,
+  },
+  // --- Total ---
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 10,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 2,
+    borderTopColor: '#000000',
+    borderTopStyle: 'solid',
   },
   totalLabel: {
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     fontSize: 12,
-    marginRight: 20,
+    marginRight: 30,
   },
   totalValue: {
-    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
     fontSize: 12,
+    minWidth: 100,
+    textAlign: 'right',
   },
+  // --- Footer ---
   footer: {
     position: 'absolute',
     bottom: 40,
-    left: 40,
-    right: 40,
+    left: 50,
+    right: 50,
     textAlign: 'center',
-    color: '#666666',
+    color: '#888888',
     fontSize: 8,
-    borderTop: '1 solid #cccccc',
+    borderTopWidth: 1,
+    borderTopColor: '#dddddd',
+    borderTopStyle: 'solid',
     paddingTop: 10,
-  }
+  },
 });
 
 const InvoiceTemplate = ({ formData, invoiceNumber }) => {
   const { customerName, startDate, startTime, endDate, endTime, price } = formData;
-  
-  // Format dates for display
-  const startDateTimeStr = startDate ? `${format(new Date(startDate), 'dd MMM yyyy')} ${startTime || ''}` : '-';
-  const endDateTimeStr = endDate ? `${format(new Date(endDate), 'dd MMM yyyy')} ${endTime || ''}` : '-';
+
+  // Use parseISO to avoid timezone off-by-one issues with date-only strings
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      return format(parseISO(dateStr), 'dd MMM yyyy');
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const formatTime12h = (timeStr) => {
+    if (!timeStr) return '';
+    const [h, m] = timeStr.split(':');
+    const hour = parseInt(h, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${m} ${ampm}`;
+  };
+
+  const startStr = startDate ? `${formatDate(startDate)}${startTime ? ', ' + formatTime12h(startTime) : ''}` : '—';
+  const endStr = endDate ? `${formatDate(endDate)}${endTime ? ', ' + formatTime12h(endTime) : ''}` : '—';
   const currentDateStr = format(new Date(), 'dd MMM yyyy');
+  const priceNum = parseFloat(price || 0);
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        
-        {/* Header Section */}
+
+        {/* Organization Header */}
         <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.orgTitle}>元天宫 <Text style={{fontSize: 12, fontFamily: 'Helvetica'}}>(No Pendaftaran: 1025-07-WKL)</Text></Text>
-            <Text style={styles.orgSubtitle}>Persatuan Penganut Dewa Yuan Tian Kong, Kuala Lumpur dan Selangor</Text>
-            <Text style={styles.secretary}>Secretary General: Ng Kee Hock</Text>
-          </View>
+          <Text style={styles.orgNameChinese}>元天宫</Text>
+          <Text style={styles.orgRegNo}>(No Pendaftaran: 1025-07-WKL)</Text>
+          <Text style={styles.orgNameMalay}>Persatuan Penganut Dewa Yuan Tian Kong, Kuala Lumpur dan Selangor</Text>
+          <Text style={styles.secretaryLine}>Secretary General: Ng Kee Hock</Text>
         </View>
 
-        {/* Invoice Title & Meta */}
+        {/* Invoice Title & Meta Info */}
         <View style={styles.invoiceHeaderRow}>
-          <View>
-            <Text style={styles.invoiceTitle}>INVOICE</Text>
-          </View>
-          <View style={styles.metaContainer}>
+          <Text style={styles.invoiceTitle}>INVOICE</Text>
+          <View style={styles.metaBlock}>
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>Invoice No:</Text>
               <Text style={styles.metaValue}>{invoiceNumber || 'DRAFT'}</Text>
@@ -202,33 +252,25 @@ const InvoiceTemplate = ({ formData, invoiceNumber }) => {
         </View>
 
         {/* Bill To */}
-        <View style={styles.billTo}>
-          <Text style={styles.billToLabel}>Bill To:</Text>
-          <Text style={styles.chineseText}>{customerName || 'Cash Customer'}</Text>
+        <View style={styles.billToSection}>
+          <Text style={styles.billToLabel}>Bill To</Text>
+          <Text style={styles.billToValue}>{customerName || '—'}</Text>
         </View>
 
         {/* Items Table */}
         <View style={styles.table}>
-          {/* Table Header */}
-          <View style={styles.tableRow}>
-            <View style={styles.tableColWideHeader}>
-              <Text style={styles.tableCell}>Description</Text>
-            </View>
-            <View style={styles.tableColHeader}>
-              <Text style={[styles.tableCell, {textAlign: 'right'}]}>Amount (RM)</Text>
-            </View>
+          <View style={styles.tableHeader}>
+            <Text style={styles.tableHeaderCellDesc}>Description</Text>
+            <Text style={styles.tableHeaderCellAmount}>Amount (RM)</Text>
           </View>
-          
-          {/* Table Body */}
-          <View style={styles.tableRow}>
-            <View style={styles.tableColWide}>
-              <Text style={[styles.chineseText, {marginBottom: 8, fontSize: 11}]}>Setup 圆坛</Text>
-              
-              <Text style={{color: '#444444'}}>Start: {startDateTimeStr}</Text>
-              <Text style={{color: '#444444'}}>End: {endDateTimeStr}</Text>
+          <View style={styles.tableBody}>
+            <View style={styles.tableCellDesc}>
+              <Text style={styles.itemTitle}>Setup 圆坛</Text>
+              <Text style={styles.itemDetail}>Start: {startStr}</Text>
+              <Text style={styles.itemDetail}>End: {endStr}</Text>
             </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellRight}>{parseFloat(price || 0).toFixed(2)}</Text>
+            <View style={styles.tableCellAmount}>
+              <Text>{priceNum.toFixed(2)}</Text>
             </View>
           </View>
         </View>
@@ -236,14 +278,14 @@ const InvoiceTemplate = ({ formData, invoiceNumber }) => {
         {/* Total */}
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total Amount:</Text>
-          <Text style={styles.totalValue}>RM {parseFloat(price || 0).toFixed(2)}</Text>
+          <Text style={styles.totalValue}>RM {priceNum.toFixed(2)}</Text>
         </View>
 
         {/* Footer */}
         <View style={styles.footer}>
           <Text>This is a computer-generated document. No signature is required.</Text>
         </View>
-        
+
       </Page>
     </Document>
   );

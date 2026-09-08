@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { supabase } from './supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Mail, LogIn, AlertCircle } from 'lucide-react';
+import { Lock, Mail, LogIn, AlertCircle, CheckCircle } from 'lucide-react';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccessMsg(null);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -22,8 +24,6 @@ function Login() {
       });
 
       if (error) throw error;
-      
-      // If successful, redirect to the app
       navigate('/app');
     } catch (err) {
       setError(err.message);
@@ -32,10 +32,19 @@ function Login() {
     }
   };
 
-  const handleSignUp = async (e) => {
-    e.preventDefault();
+  const handleSignUp = async () => {
+    if (!email || !password) {
+      setError('Please enter both email and password to sign up.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
+    setSuccessMsg(null);
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -44,12 +53,11 @@ function Login() {
       });
 
       if (error) throw error;
-      
-      // Alert user to check their email for verification, or if auto-confirm is on, just redirect.
-      alert('Sign up successful! If email confirmation is enabled on Supabase, please check your inbox.');
-      
+
       if (data.session) {
         navigate('/app');
+      } else {
+        setSuccessMsg('Account created! Please check your email for a confirmation link, then log in.');
       }
     } catch (err) {
       setError(err.message);
@@ -59,46 +67,50 @@ function Login() {
   };
 
   return (
-    <div className="app-container" style={{ maxWidth: '400px', margin: 'auto', marginTop: '10vh' }}>
+    <div className="app-container login-container">
       <div className="header">
-        <h1>Welcome Back</h1>
-        <p>Login to E-Invoice Generator</p>
+        <h1>元天宫</h1>
+        <p className="subtitle">E-Invoice Generator</p>
+        <span className="org-badge">Registration No. 1025-07-WKL</span>
       </div>
 
       <form onSubmit={handleLogin}>
         <div className="form-grid" style={{ gridTemplateColumns: '1fr' }}>
-          
-          <div className="form-group full-width">
-            <label className="form-label">
-              <Mail className="icon" size={16} />
+          <div className="form-group">
+            <label className="form-label" htmlFor="login-email">
+              <Mail className="icon" />
               Email
             </label>
             <div className="input-icon-wrapper">
               <Mail className="icon" />
-              <input 
-                type="email" 
+              <input
+                id="login-email"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="form-input" 
-                placeholder="admin@example.com"
+                className="form-input"
+                placeholder="you@example.com"
+                autoComplete="email"
                 required
               />
             </div>
           </div>
 
-          <div className="form-group full-width">
-            <label className="form-label">
-              <Lock className="icon" size={16} />
+          <div className="form-group">
+            <label className="form-label" htmlFor="login-password">
+              <Lock className="icon" />
               Password
             </label>
             <div className="input-icon-wrapper">
               <Lock className="icon" />
-              <input 
-                type="password" 
+              <input
+                id="login-password"
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="form-input" 
+                className="form-input"
                 placeholder="••••••••"
+                autoComplete="current-password"
                 required
               />
             </div>
@@ -106,27 +118,32 @@ function Login() {
         </div>
 
         {error && (
-          <div className="error-message" style={{ marginBottom: '1.5rem' }}>
-            <AlertCircle size={18} />
+          <div className="error-message" style={{ marginBottom: '1rem' }}>
+            <AlertCircle size={16} />
             {error}
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button type="submit" className="btn-generate" disabled={isLoading} style={{ flex: 1 }}>
-            {isLoading ? 'Loading...' : (
+        {successMsg && (
+          <div className="success-message" style={{ marginBottom: '1rem' }}>
+            <CheckCircle size={16} />
+            {successMsg}
+          </div>
+        )}
+
+        <div className="btn-row">
+          <button type="submit" className="btn-generate" disabled={isLoading}>
+            {isLoading ? 'Signing in...' : (
               <><LogIn className="icon" /> Login</>
             )}
           </button>
-          
-          <button 
-            type="button" 
-            onClick={handleSignUp} 
-            className="btn-generate" 
-            disabled={isLoading} 
-            style={{ flex: 1, backgroundColor: 'var(--surface-color)', color: 'var(--primary-color)', border: '1px solid var(--border-color)' }}
+          <button
+            type="button"
+            onClick={handleSignUp}
+            className="btn-secondary"
+            disabled={isLoading}
           >
-            Sign Up
+            {isLoading ? 'Processing...' : 'Sign Up'}
           </button>
         </div>
       </form>

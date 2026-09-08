@@ -26,7 +26,12 @@ function Root() {
   }, [])
 
   if (loading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'var(--primary-color)' }}>Loading...</div>
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <span className="loading-text">Loading...</span>
+      </div>
+    )
   }
 
   return (
